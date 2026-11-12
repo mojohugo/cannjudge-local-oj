@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>官方提交 · CANNJudge</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="stylesheet" href="/static/official.css?v=20261107-score-snapshots">
+<script src="/static/official-accounts.js?v=20261025-merged-accounts-1" defer></script>
+<script src="/static/official.js?v=workspace-20261108" defer></script>
+<link rel="stylesheet" href="/static/workspace.css?v=20261108"></head>
+<body class="official-page">
+<header><a class="brand" href="/official">CANN<span>JUDGE</span><small>官方评测档案</small></a><nav aria-label="主导航"><a href="/">本地评测</a><a href="/official" aria-current="page">官方提交与历史</a><button id="logout" class="plain hidden">退出</button></nav></header>
+<main>
+<div id="boot-status" class="card boot-status" role="status">正在连接官方档案…</div>
+<section id="login" class="card login hidden"><div class="eyebrow">OFFICIAL / ARCHIVE</div><h1>访问官方档案</h1><p>使用 OJ 的登录密码，官方账号由服务端独立登录会话连接。</p><form id="login-form"><label for="password">OJ 登录密码</label><input id="password" type="password" autocomplete="current-password" required><button class="primary" type="submit">登录</button><p id="login-error" role="alert"></p></form></section>
+<section id="app" class="hidden">
+<div class="hero"><div><div class="eyebrow">OFFICIAL / CANNJUDGE</div><h1 id="problem-title">官方提交与历史</h1><p id="problem-context" class="hidden"></p><p>追踪每次优化，找到各个测试点表现最好的代码。</p></div><a id="contest-link" href="https://cannjudge.cn/ccpc/ladder_2026_changchun" target="_blank" rel="noopener" class="secondary">打开官方题目 ↗</a></div>
+<div class="notice"><strong id="policy-title">提交前检查设置</strong><span id="policy-description">正在读取官方账户和本地正确性检查设置…</span></div>
+<section class="card account-controls" aria-label="官方账户及提交设置"><div class="account-picker"><label for="official-account">当前提交账户</label><div class="account-picker-row"><select id="official-account"></select><button id="switch-account" class="secondary">切换</button><button id="manage-accounts" class="plain">管理账户</button></div><small id="account-status" class="muted"></small></div><div class="validation-setting"><label class="switch-label"><input id="local-validation-toggle" type="checkbox" role="switch" checked><span>提交前本地正确性检查</span></label><p class="small muted" id="validation-setting-note">默认开启，已排队的任务保留创建时的设置。</p><small class="muted">账户和开关是网页与 MCP 共用的默认设置。</small></div></section>
+<section class="card account-quotas" aria-labelledby="quota-title"><div class="card-heading"><div><h2 id="quota-title">今日官方提交额度</h2><p class="small muted">按官网账号全部提交记录统计，北京时间每日零点重置；未上传的排队任务不扣次数。</p></div><button id="refresh-quotas" class="secondary">刷新额度</button></div><div id="account-quotas" class="quota-grid" aria-live="polite"></div><p class="small muted quota-note">余额为统计值，官网未提供直接余额接口；每日上限依据官网限额提示。后台空闲时自动更新，不占用提交次数。</p></section>
+<section class="card controls"><div class="problem-control"><label for="problem">当前题目</label><select id="problem"></select></div><div class="grow"><strong id="archive-count">正在读取官方历史…</strong><p id="sync-status" class="muted small" role="status"></p><p id="auto-sync-status" class="muted small" role="status"></p></div><div class="control-actions"><button id="sync" class="secondary">同步官方历史</button><button id="connection" class="plain">检查官方登录</button></div></section>
+<div id="page-error" class="page-error hidden" role="alert"><span id="page-error-text"></span><button id="retry" class="secondary">重试</button></div>
+<nav class="page-shortcuts" aria-label="页面导航"><a href="#official-top-title">官方前三</a><a href="#bests-title">逐点最佳</a><a href="#result-card">记录详情</a><a href="#official-history-section">全部历史</a><a href="#input-specifications">数据规格</a><span>官方与本地数据独立</span></nav><div class="official-layout">
+<aside>
+<section class="card submit-card"><div class="card-heading"><h2>提交到官方</h2><span class="pill" id="submission-kind">kernel.asc</span></div><form id="submit-form"><div id="project-controls" class="hidden"><label for="project-file">工程文件（只提交可编辑文件）</label><select id="project-file"></select><p id="project-note" class="small muted" role="status"></p><button id="export-project" type="button" class="secondary">导出工程 JSON</button></div><label for="file" id="file-label">上传源码文件</label><input type="file" id="file" accept=".asc,.txt"><p id="file-note" class="small muted">支持 .asc / .txt，也可以直接粘贴源码。</p><label for="label">版本备注</label><input id="label" maxlength="120" placeholder="例如：算法 v3"><label for="source">Ascend C 源码</label><textarea id="source" required spellcheck="false" placeholder="粘贴包含 run_kernel 的完整源码"></textarea><button id="submit" class="primary" type="submit" disabled>本地检查后提交官方 →</button><p id="submit-note" class="muted small">本地检查失败时不会上传官方。重复点击同一份请求会自动去重。</p></form></section>
+<section class="card queue-card"><div class="card-heading"><h2>账号独立提交队列</h2><button id="refresh" class="plain">刷新</button></div><p class="small muted">不同账号并行，同一账号依次执行并保留提交间隔；上传前 NPU 检查共用本地评测资源。账号状态覆盖全部题目，下方记录为当前题目。</p><div id="official-queues" class="history"></div><div id="jobs" class="history" aria-live="polite"><p class="empty">正在读取提交队列…</p></div></section>
+</aside>
+<div class="official-content">
+<section class="card" aria-labelledby="official-top-title">
+<div class="card-heading"><div><div class="eyebrow">TOP 3 / OFFICIAL HISTORY</div><h2 id="official-top-title">官方记录 · 前三</h2></div><span class="pill" id="official-top-count">—</span></div>
+<p id="official-top-note" class="footnote">按统一最新官方 TBest 复算总分排序。</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="官方前三，可横向滚动"><table><thead><tr><th>排名</th><th>对应代码</th><th class="numeric" id="ranking-score-label">最新复算分 / 100</th><th class="numeric">历史记录分</th><th>通过 / 提交时间</th></tr></thead><tbody id="official-top-rows"><tr><td colspan="5" class="empty">正在读取官方前三…</td></tr></tbody></table></div>
+</section>
+<section class="card hidden" id="official-total-history" aria-labelledby="official-total-history-title">
+<h2 id="official-total-history-title">历史 / 未重新验证的完整分</h2><p id="official-total-history-note" class="footnote"></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="历史完整分，按抓取时间展示"><table><thead><tr><th>对应代码</th><th class="numeric">原归档完整分 / 来源</th><th>原抓取时间 / 状态</th></tr></thead><tbody id="official-total-history-rows"></tbody></table></div>
+</section>
+<section class="card" id="hidden-best-card" aria-labelledby="hidden-best-title">
+<div class="card-heading"><div><div class="eyebrow">HIDDEN CASES / AGGREGATE</div><h2 id="hidden-best-title">隐藏点贡献最高 · 同一榜单快照</h2></div><span class="pill" id="hidden-top-count">—</span></div>
+<p id="hidden-top-note" class="footnote">根据官方总分和同一榜单快照的公开点分数反算。</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="隐藏点合计前三，可横向滚动"><table><thead><tr><th>排名</th><th>对应代码</th><th class="numeric">公开点贡献</th><th class="numeric">隐藏点贡献 ≈</th><th class="numeric">官方整题分 / 100</th></tr></thead><tbody id="hidden-top-rows"><tr><td colspan="5" class="empty">正在读取隐藏点合计…</td></tr></tbody></table></div>
+<details id="hidden-history" class="hidden"><summary>历史 / 未验证隐藏合计（按快照时间，仅供回顾）</summary><p class="footnote">以下是此前榜单快照的反算值，不能与当前 TBest 下的成绩直接比较。</p><div class="table-wrap" tabindex="0" role="region" aria-label="历史隐藏点合计"><table><thead><tr><th>历史记录</th><th>对应代码 / 抓取时间</th><th class="numeric">公开点贡献</th><th class="numeric">隐藏点贡献 ≈</th><th class="numeric">历史整题分 / 100</th></tr></thead><tbody id="hidden-history-rows"></tbody></table></div></details>
+</section>
+<section class="card bests-card" aria-labelledby="bests-title">
+<div class="card-heading"><div><div class="eyebrow">BEST OFFICIAL CODE / PER CASE</div><h2 id="bests-title">每个测试点的最高分代码</h2></div><span class="pill">官方数据</span></div>
+<div class="projection-summary">
+<div class="projection-main"><span>逐点组合预计总分 <small>/ 100</small></span><strong id="projected-score">—</strong><small id="projected-coverage">正在读取官方测试点…</small></div>
+<div><span id="best-single-label">当前整份最佳 · 最新复算</span><strong id="best-single-score">—</strong><button id="best-single-record" class="plain hidden">查看对应记录 ↗</button></div>
+<div><span>相对整份最佳的预计提升</span><strong id="projected-gain">—</strong><small>分数差值</small></div>
+</div>
+<div id="projection-score-breakdown"></div>
+<p id="projection-note" class="projection-note">组合预计分是各点最佳成绩的平均值，尚未经合并代码实测。</p><p id="bests-note" class="footnote"></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="各测试点最佳代码，可横向滚动"><table class="bests-table"><thead><tr><th>测试点</th><th>数据规格 / 参数</th><th class="numeric">最高单点分</th><th class="numeric">官方耗时 / TBest</th><th>对应代码 / 整份预计分</th></tr></thead><tbody id="case-bests"><tr><td colspan="5" class="empty">正在读取最佳代码…</td></tr></tbody></table></div>
+<p class="footnote">整份预计分使用该份代码所有测试点的官方耗时，按最新 TBest 复算。单点获胜的代码可能仍有未通过点；真实历史成绩在记录详情中展示。</p>
+</section>
+<section class="card result-card" id="result-card" aria-labelledby="result-title">
+<div class="card-heading"><div><div class="eyebrow">OFFICIAL RESULT</div><h2 id="result-title">选择一条官方记录</h2></div><a id="official-link" class="secondary hidden" target="_blank" rel="noopener">官方原页 ↗</a></div>
+<p id="detail-status" class="small muted" role="status"></p>
+<div id="record-content" class="hidden">
+<div class="stats"><div><span>官方记录总分 / 100</span><strong id="score">—</strong></div><div><span>通过测试</span><strong id="passed">—</strong></div><div><span>官方提交时间</span><strong id="submitted-at">—</strong></div></div><p id="score-note" class="footnote"></p><div id="record-score-breakdown"></div><p id="cases-score-basis" class="footnote"></p><p id="sha" class="muted small hash"></p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="官方逐点结果，可横向滚动"><table><thead><tr><th>测试点</th><th>数据规格 / 参数</th><th>官方结果</th><th class="numeric">错误占比</th><th class="numeric">官方耗时</th><th class="numeric">官方 TBest</th><th class="numeric">单点复算分</th></tr></thead><tbody id="cases"></tbody></table></div><p id="fetched-at" class="footnote"></p><div class="actions"><button id="show-source" class="secondary" disabled>查看官方源码</button><a id="download" class="secondary hidden" download="kernel.asc">下载 kernel.asc</a></div><div id="diagnostics"></div>
+</div></section>
+<section class="card history-card" id="official-history-section"><div class="card-heading"><div><h2>官方历史</h2><p class="muted small">合并所有已保存官方账号的已同步提交，包含未通过记录；来源账号保留。</p></div><select id="order" aria-label="历史排序"><option value="newest">提交时间 ↓</option><option value="score">原归档分 ↓（非当前排名）</option></select></div><div class="table-wrap" tabindex="0" role="region" aria-label="官方提交历史，可横向滚动"><table><thead><tr><th>官方 ID</th><th>提交时间</th><th>结果</th><th class="numeric">记录总分</th><th class="numeric">公开点贡献</th><th class="numeric">隐藏点贡献 ≈</th><th>分数来源</th><th class="numeric">通过</th><th></th></tr></thead><tbody id="history"><tr><td colspan="9" class="empty">正在读取官方历史…</td></tr></tbody></table></div><div class="pager"><button id="prev" class="secondary" disabled>上一页</button><span id="page-info" class="muted small"></span><button id="next" class="secondary" disabled>下一页</button></div></section>
+<section id="input-specifications" class="card hidden" aria-labelledby="input-spec-title">
+<div class="card-heading"><div><div class="eyebrow">INPUT SPECIFICATIONS / EVIDENCE</div><h2 id="input-spec-title">数据规格与数值特征</h2></div><span id="input-spec-count" class="pill">正在读取…</span></div>
+<p id="input-spec-note" class="footnote"></p>
+<details open><summary>公开测试点 · 已对应官方点号</summary><div class="table-wrap" tabindex="0" role="region" aria-label="公开测试点规格，可横向滚动"><table class="input-spec-table"><thead><tr><th>来源</th><th>dtype / shape / 参数</th><th class="numeric">输入元素 / 大小</th><th class="numeric">输出元素</th><th>证据</th></tr></thead><tbody id="input-known-rows"></tbody></table></div></details>
+<details open><summary>已确认的隐藏规格 · 官方点号未知</summary><p id="input-unmapped-note" class="footnote"></p><div class="table-wrap" tabindex="0" role="region" aria-label="未映射的已确认规格，可横向滚动"><table class="input-spec-table"><thead><tr><th>来源</th><th>dtype / shape / 参数</th><th class="numeric">输入元素 / 大小</th><th class="numeric">输出元素</th><th>证据</th></tr></thead><tbody id="input-unmapped-rows"></tbody></table></div></details>
+<h3>已测数值特征</h3><div id="input-features" class="input-features"></div><p id="input-unknown" class="footnote"></p>
+<details><summary>本地合成方式（非官方原始输入）</summary><p id="input-local-model" class="footnote"></p></details>
+</section>
+</div></div>
+<details class="card prompt-card"><summary>给 Agent 的“只用官方数据”提示词</summary><p class="muted small">在现有 MCP 中使用 official 工具。</p><textarea id="agent-prompt" readonly aria-label="只用官方数据提示词"></textarea><button id="copy-prompt" class="secondary">复制提示词</button></details>
+</section><footer>官方档案与本地评测独立保存 · TBest 会变化，预计分以最新同步数据为准</footer>
+</main><div id="toast" role="status"></div>
+<dialog id="source-dialog" aria-labelledby="source-title"><div class="card-heading"><div><div class="eyebrow">ARCHIVED SOURCE</div><h2 id="source-title">官方源码</h2></div><button id="close-source" class="secondary">关闭</button></div><select id="source-file" aria-label="官方项目文件"></select><p id="source-status" class="small muted" role="status"></p><pre><code id="source-code"></code></pre></dialog>
+<dialog id="accounts-dialog" aria-labelledby="accounts-title"><div class="card-heading"><h2 id="accounts-title">管理官方账户</h2><button id="close-accounts" class="secondary">关闭</button></div><p class="small muted">各账户独立保存登录状态与额度；历史、前三、隐藏合计榜和逐点最佳合并展示。切换只影响新提交，已排队任务保留原账户。</p><div id="account-list"></div><form id="add-account-form" class="account-add"><label for="account-label">新增账户备注</label><div class="account-picker-row"><input id="account-label" maxlength="60" required placeholder="例如：个人号、比赛号"><button class="secondary" type="submit">新增并登录</button></div></form><p class="small muted" id="account-manager-message" role="status"></p></dialog>
+<dialog id="official-login-dialog" aria-labelledby="official-login-title"><div class="card-heading"><h2 id="official-login-title">登录 CANNJudge</h2><button id="close-official-login" class="secondary">关闭</button></div><p class="small muted">这是服务器上的官网登录窗口。请点击画面操作，验证码由你手动填写；登录完成后点击“保存登录”。此窗口禁止提交评测。</p><div id="official-login-url" class="login-url"></div><p id="official-login-status" class="small" role="status">正在打开官网登录窗口…</p><div class="login-screen"><img id="official-login-image" alt="远程官网登录画面，点击输入框后可使用键盘输入" tabindex="0"></div><div class="login-input-tools"><input id="official-login-text" type="password" autocomplete="off" placeholder="也可在这里粘贴文字，再填入画面中选中的输入框" aria-label="填入选中输入框的内容"><button id="official-login-type" class="secondary">填入</button><button id="official-login-tab" class="secondary">Tab</button><button id="official-login-enter" class="secondary">回车</button><button id="official-login-refresh" class="plain">刷新画面</button></div><div class="actions"><button id="save-official-login" class="primary">保存登录</button><span class="small muted">登录窗口 10 分钟后自动关闭；密码和登录凭据不会返回给 MCP。</span></div></dialog>
+</body></html>

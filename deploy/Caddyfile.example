@@ -1,0 +1,9 @@
+# Run the reverse proxy on the machine where the API listens, or use a secure
+# private tunnel to it. DNS, TCP 80/443 and a reachable public endpoint required.
+oj.example.com {
+    request_body {
+        max_size 13MB
+    }
+    reverse_proxy 127.0.0.1:8765
+    header Strict-Transport-Security "max-age=31536000"
+}

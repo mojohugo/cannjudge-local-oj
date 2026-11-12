@@ -1,0 +1,17 @@
+{
+  "npu-worker": {
+    "ssh_host": "npu-worker",
+    "root": "/opt/cannjudge-local-oj",
+    "jobs": "/var/lib/cannjudge-local-oj/jobs",
+    "lock": "/var/lock/cannjudge-oj-device0.lock",
+    "execution_user": "cannjudge_oj",
+    "isolation": "separate_uid",
+    "cann_root": "/usr/local/Ascend/ascend-toolkit/latest",
+    "env_script": "/etc/cannjudge/env.sh",
+    "environment": "Ascend 910B / CANN (replace with installed versions)",
+    "device": 0,
+    "physical_device": 0,
+    "cores": 40,
+    "physical_cores": 40
+  }
+}

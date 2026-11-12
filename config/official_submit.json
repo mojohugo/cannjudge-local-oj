@@ -1,0 +1,8 @@
+{
+  "contest_url": "https://cannjudge.cn/ccpc/ladder_2026_changchun",
+  "problems": {},
+  "contest_overrides": {},
+  "project_templates": {},
+  "kernel_templates": {},
+  "helper_script": "vendor/cannjudge-submit.mjs"
+}

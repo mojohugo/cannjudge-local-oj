@@ -1,0 +1,7 @@
+{
+  "daily_limit": 0,
+  "timezone": "Asia/Shanghai",
+  "scope": "account",
+  "limit_source": "unconfigured",
+  "note": "Configure a private account policy before enabling official submissions."
+}

@@ -1,0 +1,105 @@
+<!doctype html>
+
+<html lang="zh-CN">
+
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CannJudge · 本地评测台</title><link rel="stylesheet" href="/static/style.css"><script defer src="/static/polling.js"></script><script defer src="/static/app.js?v=workspace-20261108"></script><link rel="stylesheet" href="/static/leaderboard.css?v=xiamen-score-20261025"><link rel="stylesheet" href="/static/workspace.css?v=20261108"></head>
+
+<body class="local-page">
+
+<header><a class="brand" href="/">C<span>∑</span> <b>CannJudge</b><small>LOCAL OJ</small></a><div class="header-right"><nav aria-label="工作区"><a href="/" aria-current="page">本地评测</a><a href="/official">官方档案</a></nav><span class="online"><i></i> <span id="worker-host">SSH · NPU</span></span><button id="logout" class="plain hidden">退出登录</button></div></header>
+
+<main>
+
+<section id="boot-local"><div class="loading-pulse"></div><h1>正在打开工作区</h1><p class="muted">连接评测服务…</p></section><section id="login-view" class="login card hidden"><div class="eyebrow">PRIVATE WORKSPACE</div><h1>你的昇腾评测台</h1><p>提交 kernel.asc，在自己的 NPU 上验证、比较、迭代。</p><form id="login-form"><label for="password">访问密码</label><input id="password" type="password" autocomplete="current-password" required placeholder="输入管理员密码"><button class="primary" type="submit">登录评测台 →</button></form><p class="muted small">使用与你的 MCP 相同的评测工作区。</p></section>
+
+<section id="app-view" class="hidden">
+
+<div class="title-row"><div><div class="eyebrow">ASCEND C / OPERATOR LAB</div><h1><span id="problem-title">题目评测</span> <span class="pill">WORKSPACE</span></h1><p>验证正确性，定位瓶颈，比较每一次改进。</p></div><div class="machine"><strong id="machine-name">NPU</strong><span id="machine-info">SSH 评测服务器</span></div></div>
+
+<div class="notice"><strong>测试规格与边界</strong><span id="dataset-note">每道题独立维护数据、规则和评分基线。本地耗时不等于官方成绩。</span></div>
+
+<div class="workspace">
+
+<aside>
+
+<section id="new-submission" class="card submit-card"><div class="card-heading"><h2>提交源码</h2><span id="source-kind" class="muted small">单文件 · 最大 2 MiB</span></div>
+
+<form id="submit-form"><label for="problem-select">评测题目</label><select id="problem-select"></select><p id="problem-version" class="muted small"></p><label class="dropzone" id="dropzone" for="file"><span class="upload-icon">↑</span><strong id="file-label">选择或拖入 kernel.asc</strong><span class="muted small">也可以在下方粘贴源码</span><input id="file" type="file" accept=".asc,.txt" class="file-input"></label>
+
+<label for="label">版本备注</label><input id="label" maxlength="120" placeholder="例如：细列切分 v2">
+
+<div id="project-editor" class="hidden"><label for="project-path">当前工程文件</label><select id="project-path"></select><p id="project-progress" class="muted small"></p><label for="project-folder">导入整个工程目录</label><input id="project-folder" type="file" webkitdirectory multiple><p class="muted small">只读取四个可编辑文件；CMakeLists.txt 使用官方模板。也可切换文件分别粘贴，或上传归档 project.json。</p></div>
+<label id="source-label" for="source">kernel.asc</label><textarea id="source" spellcheck="false" placeholder="粘贴包含 run_kernel 的 Ascend C 源码…" required></textarea>
+
+<label for="profile-mode">评测模式</label><select id="profile-mode"><option value="timing">快速迭代 · 正确性与设备耗时</option><option value="full">完整诊断 · 增加缓存与 UB 指标</option></select><p class="muted small">快速模式保留全部测试与数值校验，省去 L2Cache / MemoryUB 采集。</p>
+
+<label for="suite">评测数据</label><select id="suite"><option value="official_shapes">默认测试集 · 题目规格</option><option value="custom">自定义 · C++ 生成数据</option><option value="subset">指定测试点 · 复用默认数据</option><option value="structured">Pdist · 宽矩阵正确性回归</option></select>
+<div id="subset-data" class="hidden"><div id="case-picker" class="case-picker"></div><p class="inline-help">使用原始输入和校验规则；子集结果不参与全套排名。</p></div><p id="structured-note" class="inline-help hidden">覆盖宽矩阵、尾块与近邻的独立正确性回归，不参与性能排名。</p>
+<div id="custom-data" class="hidden"><div class="card-heading generator-heading"><label for="generator">generate.cpp</label><button id="load-example" class="plain" type="button">载入本题示例</button></div><input id="generator-file" type="file" accept=".cpp,.cc"><textarea id="generator" spellcheck="false" placeholder="C++17；按本题约定向 OUTPUT_DIR 写入输入"></textarea><p class="muted small"><span id="generator-limits">只生成输入，参考答案由服务端计算。</span> <a id="example-link" href="#">查看格式</a></p></div>
+
+<button id="submit" class="primary" type="submit">提交评测 →</button><button id="preflight" class="plain" type="button">仅检查源码规则</button><p class="muted small">独立编译 · 串行评测 · 保留源码与日志</p></form></section>
+
+<section class="card history-card"><div class="card-heading"><h2>提交记录</h2><span id="history-count" class="muted small">0</span><button id="refresh-history" type="button" class="plain">刷新</button></div><input id="history-search" class="history-filter" type="search" placeholder="搜索备注或源码 SHA" aria-label="筛选提交记录"><div id="history" class="history"><p class="empty">尚无提交</p></div></section>
+
+</aside>
+
+<div class="results"><nav class="workspace-tabs" aria-label="评测视图" role="tablist"><button type="button" role="tab" data-workspace-tab="report" aria-selected="true">评测报告</button><button type="button" role="tab" data-workspace-tab="rankings" aria-selected="false">排行榜与最佳代码</button><button type="button" role="tab" data-workspace-tab="diagnostics" aria-selected="false">性能诊断</button><a class="mobile-submit" href="#new-submission">新建提交 ↓</a><span class="sync-indicator" id="sync-indicator">等待更新</span></nav>
+
+<section class="card result-card" data-workspace-panel="report"><div class="card-heading"><div><div class="eyebrow">EVALUATION</div><h2 id="result-title">等待第一份提交</h2></div><span id="result-status" class="badge">未开始</span></div>
+
+<div class="stats"><div><span>通过测试</span><strong id="passed">—</strong></div><div><span>模拟分 · 官方公式 / 100</span><strong id="score">—</strong></div><div><span>源码 SHA-256</span><strong id="sha" class="hash">—</strong></div></div>
+
+<div id="score-groups" class="score-groups hidden" aria-label="本地分组得分" aria-live="polite"></div>
+<p id="score-note" class="footnote">逐点按 100 / (1 + log₁.₅(用时 / TBest)) 计分，再取平均；TBest 使用同环境的本地逐点最优。</p>
+
+<p id="result-message" class="muted message">上传源码后，这里会逐点显示评测结果。</p>
+
+<div id="queue-strip" class="queue-strip hidden" role="status"><strong id="queue-label"></strong><span id="queue-position"></span></div><div id="cost-grid" class="cost-grid"></div><p id="evaluation-cost" class="footnote"></p>
+
+<div class="table-wrap"><table><thead><tr><th>测试点</th><th>规格 / 参数</th><th>结果</th><th>该点分 / 100</th><th>本地 TBest</th><th>错误占比</th><th>Event 耗时</th><th>设备耗时*</th><th>基线加速比</th><th>线上实测</th><th>线上估时 / 经验范围*</th></tr></thead><tbody id="cases"></tbody></table></div>
+
+<p id="calibration-note" class="footnote"></p>
+
+<p id="timing-note" class="footnote"></p>
+
+<p id="submission-identity" class="footnote"></p><div class="actions"><button id="copy-submission-id" class="secondary" type="button" disabled>复制提交 ID</button><button id="show-logs" class="secondary" disabled>查看日志</button><a id="download" class="secondary disabled" href="#">下载本次源码</a><button id="set-baseline" class="secondary" disabled>设为对比基线</button><button id="cancel" class="plain hidden">取消排队</button></div>
+
+<p id="baseline-note" class="footnote">选择全部通过的当前版本默认测试集提交，可设为本题共用基线。</p>
+
+</section>
+
+<section class="card" data-workspace-panel="diagnostics"><div class="card-heading"><h2>规则检查与诊断</h2><span class="muted small">来源与证据分列</span></div><div id="checks"><p class="empty">提交前静态检查，执行时逐调用核对 kernel 数量。</p></div></section>
+
+<section class="card" data-workspace-panel="diagnostics"><div class="card-heading"><h2>内存、缓存与执行指标</h2><span class="muted small">逐点展开</span></div><div class="actions"><button id="build-evidence" class="secondary" type="button">读取构建兼容性证据</button></div><div id="build-evidence-content"></div><div id="metrics"><p class="empty">正确性通过后采集 PipeUtilization / L2Cache / MemoryUB</p></div></section>
+
+<div data-workspace-panel="rankings"><section class="card" aria-labelledby="leaderboard-title"><div class="card-heading"><h2 id="leaderboard-title">本题前三 · 官方公式模拟</h2><span id="leaderboard-count" class="muted small">全部历史提交</span></div>
+
+<div id="leaderboard-baseline" class="muted small"></div>
+
+<div class="table-wrap"><table aria-label="本题分数前三"><thead><tr><th>排名</th><th>版本备注</th><th>模拟分 / 100 ↑</th><th>通过</th><th>报告</th></tr></thead><tbody id="leaderboard-rows"></tbody></table></div>
+
+<p id="leaderboard-note" class="footnote" aria-live="polite">正在读取排行榜…</p></section>
+
+<section class="card" aria-labelledby="case-best-title"><div class="card-heading"><h2 id="case-best-title">逐点最佳代码</h2><span id="case-best-method" class="muted small">全部可比历史</span></div>
+
+<div class="table-wrap"><table aria-label="各测试点最高分对应的代码"><thead><tr><th>测试点</th><th>规格 / 参数</th><th>最高单点分 / 100</th><th>最优耗时</th><th>对应版本</th><th>整份通过</th><th>代码 / 报告</th></tr></thead><tbody id="case-best-rows"></tbody></table></div>
+
+<p id="case-best-note" class="footnote" aria-live="polite">正在读取逐点最优…</p></section>
+
+</div>
+<section id="ab-card" class="card utility-card hidden" data-workspace-panel="diagnostics"><div class="card-heading"><h2>A/B 交错复测</h2><span class="muted small">本地诊断 · 不计排名</span></div><p class="muted small">两份已通过源码在相同数据上按 A-B-B-A 运行，帮助区分改进与波动。</p><form id="ab-form"><div class="ab-grid"><div><label for="ab-a">版本 A · 本地提交 ID</label><input id="ab-a" required placeholder="32 位提交 ID"></div><div><label for="ab-b">版本 B · 本地提交 ID</label><input id="ab-b" required placeholder="32 位提交 ID"></div><div><label for="ab-indices">测试点（1–3 个）</label><input id="ab-indices" required placeholder="例如 7,13"></div><div><label for="ab-budget">总时间预算</label><select id="ab-budget"><option value="300">5 分钟</option><option value="600">10 分钟</option><option value="1200">20 分钟</option></select></div></div><button class="primary ab-submit" id="ab-submit" type="submit">提交一次 A-B-B-A 复测</button></form><div id="ab-result"></div></section>
+<section id="logs-card" class="card hidden"><div class="card-heading"><h2>评测日志</h2><button id="hide-logs" class="plain">收起</button></div><pre id="logs"></pre></section>
+
+<details class="card protocol"><summary>评测规则与环境</summary><div id="protocol"></div></details>
+
+</div></div>
+
+</section>
+
+<footer>本页提交至个人 NPU · 官方评测请使用独立的官方提交入口</footer>
+
+</main><div id="toast" role="status" aria-live="polite"></div>
+
+<dialog id="kernel-dialog" aria-labelledby="kernel-title"><div class="card-heading"><h2 id="kernel-title">最优源码</h2><div class="actions"><a id="kernel-download" class="secondary" href="#" download="kernel.asc">下载源码</a><button id="kernel-close" class="secondary" type="button">关闭</button></div></div><p id="kernel-meta" class="muted small"></p><select id="kernel-file" class="hidden" aria-label="本地工程文件"></select><pre class="kernel-preview"><code id="kernel-code"></code></pre></dialog>
+
+</body></html>

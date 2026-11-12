@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "formula": "mean(100 / (1 + log(time / TBest) / log(1.5)))",
+  "formula_id": "cannjudge_time_ratio_v1",
+  "formula_source": "https://cannjudge.cn/js/pages/scoring-rules-content.js",
+  "problems": {},
+  "local_suites": {}
+}

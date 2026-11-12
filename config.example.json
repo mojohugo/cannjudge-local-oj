@@ -1,0 +1,18 @@
+{
+  "ssh_host": "npu-worker",
+  "remote_root": "/opt/cannjudge-local-oj",
+  "ssh_reconnect_seconds": 300,
+  "ssh_job_attempts": 3,
+  "evaluation_workers": 2,
+  "allowed_hosts": [
+    "127.0.0.1",
+    "localhost",
+    "[::1]"
+  ],
+  "secure_cookies": false,
+  "public_origin": null,
+  "local_origin": "http://127.0.0.1:8765",
+  "worker_enabled": false,
+  "official_submit_enabled": false,
+  "official_auto_sync_enabled": false
+}
